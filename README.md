@@ -105,7 +105,113 @@ define('js/business',[
 
 一个简单的判断就是当你的UI是通过Ctrl+c加Ctrl+v得到的时候，就要考虑一下代码复用的问题了。
 
+Backbone里面怎么复用代码呢？
 
+其实很简单。Backbone的view机制其实就是一种复用机制。因为我们可以通过view的render方法拿到这个view对应的html片短，然后将这个片段插入到
+需要的地方，就可以了。
+所以我们来做一个只展示accordin的view。先看文件夹结构:
+
+```
+---------accordin
+|
+| ----------template
+|            |
+|            |
+|            --------accordin.tpl
+|            
+| ----------view
+            |
+            |
+            --------accordin.js
+ ```
+ 
+ accordin.tpl
+```
+<div id="accordin">
+    <div class="row_box J-row-box">
+        <span class="name font2 important-color-2"><#=title#></span>
+        <span name="triangle" class="down_triangle ">&#xe6d9;</span>
+        <span class="val font2 normal-color-1"><#=subTitle#></span>
+    </div>
+    <div name="detail_box" class="detail_list font6 normal-color-1 border-top">
+              
+    </div>
+```
+可以看到我们把title和subTitle提取了出来，这样使用者可以自己设置title和subTitle的内容。同时我们把删除了内容，这个部分需要调用者自己提供。
+
+accordin.js
+```
+define('js/accordin',[
+ 'text!templates/accordin.tpl'
+],function(TPL){
+  var view = Backbone.View.extend({
+    initialize: function(options,config) {
+      this.render(options);
+    },
+    render: function(data) {
+      this.$el.html(tpl(TPL)(data));
+      return this;
+    },
+    events: {
+       'click .J-row-box': 'toggleDetailBox',
+    },
+    toggleDetailBox : function(e) {
+       var $target = $(e.currentTarget).find('span[name="triangle"]').eq(0);
+       var $detailBox = $($($target).parent()).parent().find('div[name="detail_box"]');
+       if ($target.length < 1) {
+            return;
+       }
+
+       if ($target.hasClass('down_triangle')) {
+           // 显示detail_box
+          $target.removeClass('down_triangle').addClass('up_triangle');
+          $detailBox.show();
+        } else {
+         // 隐藏detail_box
+         $target.removeClass('up_triangle').addClass('down_triangle');
+         $detailBox.hide();
+       }
+    },
+  });
+  return view;
+```
+
+这里我们把accordin相关的代码从business.js文件里提取了出来，封装做成了我们自己的accordin.js。
+
+然而这样还是有问题。注意toggleDetailBox那个方法，我们似乎做了太多的DOM操作，这个方法其实是很难维护的。而且Backbone不是一个MVC框架吗。我们的M层好像没有用到。所以toggleDetailBox是不是可以通过增加M层代码来简化呢？我们试一试:
+
+```
+------accordin
+       |
+       |
+  -----template
+         |
+         |
+         accordin.tpl
+  ------view
+         |
+         |
+         accordin.view.js
+  ------model
+         |
+         |
+         accordin.model.js
+ ```
+ 
+ accordin.tpl
+ 
+ ```
+<div id="accordin">
+    <div class="row_box J-row-box">
+        <span class="name font2 important-color-2"><#=title#></span>
+        <span name="triangle" class="down_triangle ">&#xe6d9;</span>
+        <span class="val font2 normal-color-1"><#=subTitle#></span>
+    </div>
+    <div name="detail_box" class="detail_list font6 normal-color-1 border-top">
+         <#=children#>     
+    </div>
+ ```
+ 
 
 
 
