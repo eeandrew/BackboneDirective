@@ -20,7 +20,7 @@ Backbone虽然是一个较为古老并且使用繁琐的MVC框架，但是使用
 <...其他和accrodin无关的html片段...>
  <div id="accordin">
     <div class="row_box J-row-box">
-        <span class="name font2 important-color-2">这是标题</span>
+        <span class="name font2 important-color-2">Accordin1</span>
         <span name="triangle" class="down_triangle ">&#xe6d9;</span>
         <span class="val font2 normal-color-1">小标题</span>
     </div>
@@ -46,9 +46,50 @@ define('js/accordin',[
        'click .J-row-box': 'toggleDetailBox',
     },
     toggleDetailBox : function(e) {
-      
-    }
+       var $target = $(e.currentTarget).find('span[name="triangle"]').eq(0);
+       var $detailBox = $($($target).parent()).parent().find('div[name="detail_box"]');
+       if ($target.length < 1) {
+            return;
+       }
+
+       if ($target.hasClass('down_triangle')) {
+           // 显示detail_box
+          $target.removeClass('down_triangle').addClass('up_triangle');
+          $detailBox.show();
+        } else {
+         // 隐藏detail_box
+         $target.removeClass('up_triangle').addClass('down_triangle');
+         $detailBox.hide();
+       }
+    },
   });
   return view;
 })
 ```
+如果我们这个页面有两个accordin呢？按照上面的思路，我们很容易就写出这样的代码
+```
+<...其他和accrodin无关的html片段...>
+ <div id="accordin">
+    <div class="row_box J-row-box">
+        <span class="name font2 important-color-2">标题1</span>
+        <span name="triangle" class="down_triangle ">&#xe6d9;</span>
+        <span class="val font2 normal-color-1">小标题1</span>
+    </div>
+    <div name="detail_box" class="detail_list font6 normal-color-1 border-top">
+        <div>这是内容</div>        
+    </div>
+  </div>
+  <...其他和accrodin无关的html片段...>
+  <div id="accordin">
+    <div class="row_box J-row-box">
+        <span class="name font2 important-color-2">标题2</span>
+        <span name="triangle" class="down_triangle ">&#xe6d9;</span>
+        <span class="val font2 normal-color-1">小标题2</span>
+    </div>
+    <div name="detail_box" class="detail_list font6 normal-color-1 border-top">
+        <div>这是内容</div>        
+    </div>
+  </div>
+```
+
+如果有10个accordin呢？我们就..............玩完 :(
