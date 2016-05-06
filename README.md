@@ -201,17 +201,85 @@ define('js/accordin',[
  accordin.tpl
  
  ```
-<div id="accordin">
+<div id="<#=key#>" class="accordin">
     <div class="row_box J-row-box">
         <span class="name font2 important-color-2"><#=title#></span>
-        <span name="triangle" class="down_triangle ">&#xe6d9;</span>
+        <# if(!disabled){#>
+          <span name="triangle" class="<#if(!isOpen){echo('down_triangle')}#> <#if(isOpen){echo('up_triangle')}#> J_triangle_icon  fonts9">&#xe6d9;</span>
+        <#} #>
+        <# if(disabled){#>
+          <span name="triangle" style="color:#fff" class="down_triangle  fonts9">&#xe6d9;</span>
+        <#} #>
         <span class="val font2 normal-color-1"><#=subTitle#></span>
     </div>
     <div name="detail_box" class="detail_list font6 normal-color-1 border-top">
-         <#=children#>     
+        <!--content-->
+        <# if(isOpen) {#>
+            <#=children#>
+        <#}#>
     </div>
+</div>
  ```
- 
+这里我们新增了children字段，熟悉React的同学是不是有点兴奋了？同时我们发现，对view的控制似乎完全通过一些参数来操作。比如很容易就看到当isOpen为true时，渲染children,反之，则不渲染。这种控制是不是和Angular里面的ng-show=isOpen很像？OK, 实现children的关键在于我们的Model.
+
+accordin.model.js
+```
+define('accordin/model/accordin_model',[
+],function(){
+   var AccordinModel = Backbone.Model.extend({
+      set: function(attributes, options) {
+          if(attributes.children && typeof attributes.children !== 'string') {
+              var tmp = document.createElement("div");
+              tmp.appendChild(attributes.children);
+              attributes.children = tmp.innerHTML;
+          }
+          Backbone.Model.prototype.set.apply(this, arguments);
+      },
+      defaults : function() {
+        return {
+          title:'title',
+          subTitle:'subTitle',
+          key:'_id',
+          isOpen:false,
+          disabled:false,
+          children:null,
+        };
+      },
+      toggleOpen : function() {
+        this.set({isOpen:!this.get('isOpen')});
+      },
+    });
+    return AccordinModel;
+});
+```
+accordin.view.js
+```
+define('accordin/view/accordin_view',[
+  'js/components/common_view',
+  'text!js/template/accordin/accordin.tpl'
+],function(CommonView,TPL){
+  var AccordinView = {
+    initialize: function() {
+        this.listenTo(this.model,'change',this.render);
+    },
+    render : function() {
+       this.$el.html(tpl(TPL)(this.model.toJSON()));
+       return this;
+    },
+  	events: {
+      'click .J-row-box': 'toggleDetailBox',
+  	},
+    toggleDetailBox : function(e) {
+      this.model.toggleOpen();
+      return;
+    },
+  };
+  return Backbone.View.extend(AccordinView);
+});
+```
+留意我们的toggleDetailBox方法。容易发现我们再也不用直接操作DOM了，相反的，我们通过直接操作Model,然后Model的变化引发View的重新渲染来达到间接操作view的目的。同时，我们也将对view的操作由基于jquery的命令式，变成了基于MVC的声明式。而声明式的书写UI，不正是现代前端框架(Angular,React,Vue,Meteor)的一致方向吗？
+
+
 
 
 
