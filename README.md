@@ -14,6 +14,8 @@ Backbone虽然是一个较为古老并且使用繁琐的MVC框架，但是使用
 
 这个accordin控件的样子
 
+#### 错误的使用Backbone
+
 我们先来看看一种经常被使用的错误的构建方式：
 在我们的页面中有一个accordin，所以我们直接就把accordin的代码放在这个页面中
 这是HTML模板business.tpl
@@ -107,6 +109,8 @@ define('js/business',[
 
 Backbone里面怎么复用代码呢？
 
+#### 简单的复用
+
 其实很简单。Backbone的view机制其实就是一种复用机制。因为我们可以通过view的render方法拿到这个view对应的html片短，然后将这个片段插入到
 需要的地方，就可以了。
 所以我们来做一个只展示accordin的view。先看文件夹结构:
@@ -177,6 +181,8 @@ define('js/accordin',[
 ```
 
 这里我们把accordin相关的代码从business.js文件里提取了出来，封装做成了我们自己的accordin.js。
+
+#### 基于MVC的复用
 
 然而这样还是有问题。注意toggleDetailBox那个方法，我们似乎做了太多的DOM操作，这个方法其实是很难维护的。而且Backbone不是一个MVC框架吗。我们的M层好像没有用到。所以toggleDetailBox是不是可以通过增加M层代码来简化呢？我们试一试:
 
@@ -279,6 +285,29 @@ define('accordin/view/accordin_view',[
 ```
 留意我们的toggleDetailBox方法。容易发现我们再也不用直接操作DOM了，相反的，我们通过直接操作Model,然后Model的变化引发View的重新渲染来达到间接操作view的目的。同时，我们也将对view的操作由基于jquery的命令式，变成了基于MVC的声明式。而声明式的书写UI，不正是现代前端框架(Angular,React,Vue,Meteor)的一致方向吗？
 
+#### 弱指令
+
+由于Backbone的原因，我们不能这样使用我们的accordin
+
+business.tpl
+```
+<accordin accordin model={{model}}></accordin>
+```
+
+我们的accordin使用起来是比较繁琐的：
+```
+var accordinModel = new AccordinModel({
+        title:'这是标题',
+        subTitle:'小标题',
+        disabled:false,
+        children:"<div>我是内容</div>" ,
+      });
+      var accordinView = new AccordinView({
+        model : accordinModel
+      });
+      this.$('.insured-section').html(accordinView.render().el);
+```
+可以看到accordin是通过命令式的方法来使用的。这也是为什么我把这种模式取名为弱指令。不过通过这两个对比，我们也发现了前端框架的进化动力。这种动力其实不来自js语言或者css语言本身的进化，而是来自对现有模式的观察和勇于变更。所以前端的迭代，更多的是一种思想的进化。理解一个框架，不是简单的学学使用API,而是要理解为什么会有这些API, 作者是基于那些考虑。这样才能把握前端框架的本质，不迷失在吵吵嚷嚷的前端世界！
 
 
 
