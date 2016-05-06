@@ -15,7 +15,8 @@ Backbone虽然是一个较为古老并且使用繁琐的MVC框架，但是使用
 这个accordin控件的样子
 
 我们先来看看一种经常被使用的错误的构建方式：
-这是HTML模板accordin.tpl
+在我们的页面中有一个accordin，所以我们直接就把accordin的代码放在这个页面中
+这是HTML模板business.tpl
 ```
 <...其他和accrodin无关的html片段...>
  <div id="accordin">
@@ -32,8 +33,8 @@ Backbone虽然是一个较为古老并且使用繁琐的MVC框架，但是使用
 ```
 这是view文件
 ```
-define('js/accordin',[
- 'text!templates/accordin.tpl'
+define('js/business',[
+ 'text!templates/business.tpl'
 ],function(TPL){
   var view = Backbone.View.extend({
     initialize: function(options,config) {
@@ -93,3 +94,14 @@ define('js/accordin',[
 ```
 
 如果有10个accordin呢？我们就..............玩完 :(
+
+这种思路最大的问题就在于不懂得代码复用。可能有同学要说，可是我复用了啊！你看我把accrodin相关的HTML代码复用了10次！
+
+复用和复制？
+复用：用一段代码处理相似的逻辑
+复制：用多段相似的代码处理相似的逻辑
+
+
+
+
+
